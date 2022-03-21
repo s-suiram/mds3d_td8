@@ -30,16 +30,16 @@ vec3 square(float uv, float length){
 
     if (uv < 0.25){
         c.y = -length/2;
-        c.z = ((uv * 4) - 0.5) * length ;
+        c.z = ((uv * 4) - 0.5) * length;
     } else if (uv < 0.5) {
         c.z = length/2;
-        c.y = (((uv -0.25) * 4) - 0.5) * length ;
+        c.y = (((uv -0.25) * 4) - 0.5) * length;
     } else if (uv < 0.75) {
         c.y = length/2;
-        c.z = -(((uv -0.50)* 4) - 0.5) * length ;
+        c.z = -(((uv -0.50)* 4) - 0.5) * length;
     } else {
         c.z = -length/2;
-        c.y = -(((uv -0.75)* 4) - 0.5) * length ;
+        c.y = -(((uv -0.75)* 4) - 0.5) * length;
     }
     return c;
 }
@@ -74,11 +74,19 @@ vec3 bezier4(vec3 p0, vec3 p1, vec3 p2, vec3 p3, float u, out vec3 T) {
     return p02 + u * (p12 - p02);
 }
 
+vec3 cylBezierTorsion(float u, float v, float r, vec3 b0, vec3 b1, vec3 b2, vec3 b3) {
+    vec3 T;
+    vec3 center = bezier4(b0, b1, b2, b3, u, T);
+    mat3 TBN = getTBN(normalize(T));
+    vec3 extruded = TBN * rotation(torsion * u) * square(v, r);
+    return center + extruded;
+}
+
 vec3 cylBezier(float u, float v, float r, vec3 b0, vec3 b1, vec3 b2, vec3 b3) {
     vec3 T;
     vec3 center = bezier4(b0, b1, b2, b3, u, T);
     mat3 TBN = getTBN(normalize(T));
-    vec3 extruded =  TBN  * rotation(torsion * u) * square(v, r);
+    vec3 extruded = TBN * circle(v, r);
     return center + extruded;
 }
 
@@ -91,7 +99,9 @@ vec3 cylinder(float u, float v, vec3 A, vec3 B, float r) {
 }
 
 vec3 s(float u, float v) {
-    return cylBezier(u, v, 0.3, vec3(-0.5, -1, -1), vec3(1.5, 1, -0.3), vec3(-1.5, 1, 0.3), vec3(0.5, -1, 1));
+    return cylBezierTorsion(u, v, 0.3, vec3(-0.5, -1, -1), vec3(1.5, 1, -0.3), vec3(-1.5, 1, 0.3), vec3(0.5, -1, 1));
+    //        return cylBezier(u, v, 0.3, vec3(-0.5, -1, -1), vec3(1.5, 1, -0.3), vec3(-1.5, 1, 0.3), vec3(0.5, -1, 1));
+    //        return cylinder(u, v, vec3(-4, -6, -8), vec3(10, 12, 15), 2);
 }
 
 void main() {
